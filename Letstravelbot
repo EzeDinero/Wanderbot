@@ -1,0 +1,39 @@
+import random
+import requests
+
+class Destination:
+    def __init__(self, name, description, nightlife):
+        self.name = name
+        self.description = description
+        self.nightlife = nightlife
+
+class TravelMateBot:
+    def __init__(self, telegram_token):
+        self.base_url = "https://api.opentripmap.com/0.1/en/places/"
+        self.api_key = "YOUR_API_KEY"
+        self.telegram_token = telegram_token
+        self.destinations = {
+            "paris": "Paris is the capital city of France and is famous for its art, fashion, food, and culture.",
+            "kyoto": "Kyoto is a city located in the central part of the island of Honshu, Japan. It is famous for its numerous classical Buddhist temples, as well as gardens, imperial palaces, Shinto shrines, and traditional wooden houses.",
+            "rio de janeiro": "Rio de Janeiro is a city in Brazil, known for its Copacabana and Ipanema beaches, Christ the Redeemer statue atop Mount Corcovado, Sugarloaf Mountain, and for its annual Carnival festival.",
+            # Add more destinations here
+        }
+
+    def suggest_destination(self, interests=None):
+        if interests:
+            destinations = [d for d in self.destinations if interests.lower() in d]
+            destination = random.choice(destinations) if destinations else random.choice(list(self.destinations.keys()))
+        else:
+            destination = random.choice(list(self.destinations.keys()))
+        return destination
+
+    def get_destination_info(self, destination):
+        url = f"{self.base_url}{destination}?apikey={self.api_key}&kinds=nightlife"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            if 'name' in data:
+                name = data['name']
+                description = data.get('wikipedia_extracts', {}).get('text', "No description available.")
+                nightlife = data.get('kinds', {}).get('nightlife', [])
+                nightlife_info = self.ge
